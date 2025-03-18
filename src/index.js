@@ -21,6 +21,12 @@ app.get("/health", (req, res) => {
   });
 });
 
+app.get("/", (req, res) => {
+  res.status(200).json({
+    message: "Welcome to the Student Management System",
+  });
+});
+
 app.use("/api/v1/student", studentRoute);
 app.use("/api/v1/parent", parentRoute);
 app.use("/api/v1/holiday", holidayRoute);
