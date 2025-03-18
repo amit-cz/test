@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Student {
+  id         Int     @id @default(autoincrement())
+  first_name String
+  last_name  String
+  email      String  @unique
+  status     Boolean @default(true)
+  password   String
+
+  subjects Enrollment[]
+  parent   parent_student?
+  holidays StudentHoliday[]
+}
+
+model Subject {
+  id       Int          @id @default(autoincrement())
+  name     String
+  students Enrollment[]
+}
+
+model Enrollment {
+  id        Int   @id @default(autoincrement())
+  studentId Int
+  subjectId Int
+  marks     Float @default(0.0)
+
+  student Student @relation(fields: [studentId], references: [id])
+  subject Subject @relation(fields: [subjectId], references: [id])
+
+  @@unique([studentId, subjectId])
+}
+
+model Parent {
+  id         Int    @id @default(autoincrement())
+  first_name String
+  last_name  String
+  email      String @unique
+  password   String
+
+  student parent_student?
+}
+
+model parent_student {
+  id        Int @id @default(autoincrement())
+  studentId Int @unique
+  parentId  Int @unique
+
+  student Student @relation(fields: [studentId], references: [id])
+  parent  Parent  @relation(fields: [parentId], references: [id])
+
+  @@unique([studentId, parentId])
+}
+
+model Holiday {
+  id         Int       @id @default(autoincrement())
+  name       String
+  start_date DateTime  @unique @db.Date
+  end_date   DateTime? @db.Date
+
+  students StudentHoliday[]
+}
+
+model StudentHoliday {
+  id        Int @id @default(autoincrement())
+  studentId Int
+  holidayId Int
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  holiday Holiday @relation(fields: [holidayId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, holidayId])
+}
